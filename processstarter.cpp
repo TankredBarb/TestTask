@@ -21,8 +21,6 @@ void ProcessStarter::onReadyReadStdOut()
 
     while (!mProcess.atEnd())
     {
-
-
         mOutput.append((mProcess.readLine()) );
     }
 }
