@@ -7,9 +7,8 @@ ProcessStarter::ProcessStarter(QObject *parent):
     mProcess.setProcessChannelMode(QProcess::MergedChannels);
 }
 
-void ProcessStarter::execute(QString command)
+void ProcessStarter::execute(const QString& command)
 {
-    mProcessOutput = "";
     mOutput.clear();
     mProcess.start(command);
     mProcess.waitForFinished();
@@ -18,7 +17,6 @@ void ProcessStarter::execute(QString command)
 
 void ProcessStarter::onReadyReadStdOut()
 {
-
     while (!mProcess.atEnd())
     {
         mOutput.append((mProcess.readLine()) );

@@ -1,6 +1,5 @@
 #include "servercore.h"
 
-
 SimpleHttpServer::SimpleHttpServer(quint16 port, QObject * par):
     QTcpServer(par), mPort(port)
 
@@ -8,9 +7,9 @@ SimpleHttpServer::SimpleHttpServer(quint16 port, QObject * par):
     allMethods.append("GET");  //We only support GET for now
 }
 
-void SimpleHttpServer::startListenPort()
+bool SimpleHttpServer::startListenPort()
 {
-    this->listen(QHostAddress::Any, mPort);
+    return listen(QHostAddress::Any, mPort);
 }
 
 void SimpleHttpServer::stopListenPort()
@@ -32,10 +31,7 @@ void SimpleHttpServer::incomingConnection(qintptr socketId)
 
 void SimpleHttpServer::readFromClientSocket()
 {
-
-    // This slot is called when the client sent data to the server. The
-    // server looks if it was a get request and sends a very simple HTML
-    // document back.
+    // Getting request from client
     QTcpSocket * pClientSocket = qobject_cast<QTcpSocket *>(sender());
 
     if (pClientSocket != nullptr && pClientSocket->canReadLine())
@@ -49,17 +45,16 @@ void SimpleHttpServer::readFromClientSocket()
         if (tokens.size() >=2 && tokens[0] == allMethods[0])  //GET
         {
             mCurrentCommand = StringToCommand(tokens[1]);
-
             if (mCurrentCommand != comDefault)
             {
-
+                // Send 200 for correct requests
                 switch (mCurrentCommand)
                 {
                     case comRoot:
                         handleRoot(pClientSocket); break;
 
                     case comProcList:
-                        handleProcessesList(pClientSocket);  break;
+                        handleProcessesList(pClientSocket); break;
 
                     case comListDir:
                         handleListDir(pClientSocket); break;
@@ -67,40 +62,35 @@ void SimpleHttpServer::readFromClientSocket()
                     case comDate:
                         handleDate(pClientSocket); break;
 
-                    default: ;
-                }
-
-
-
-                if (pClientSocket->state() == QTcpSocket::UnconnectedState)
-                {
-                    delete pClientSocket;
-
-                //Connection closed
+                    default:;
                 }
             }
-
             else
             {
                 // Send 404 for unknown command
-
                 handleNotFound(pClientSocket);
             }
-
-
         }
 
         else
         {
-            //TODO: Send 500 for non-GET methods
+            // We only know HTTP GET method, so sending 500 for another
+            handleServerFailure(pClientSocket);
         }
 
+        pClientSocket ->close();
+        if (pClientSocket->state() == QTcpSocket::UnconnectedState)
+        {
+            pClientSocket->deleteLater();
+        }
 
     }
 }
 
+
 void SimpleHttpServer::dropClientSocket()
 {
+    // We should clear socket that we create in incomingConnection
     QTcpSocket * pClientSocket = qobject_cast<QTcpSocket *>(sender());
 
     if (pClientSocket != nullptr)
@@ -109,7 +99,7 @@ void SimpleHttpServer::dropClientSocket()
     }
 }
 
-SupportedCommands SimpleHttpServer::StringToCommand(QString s)
+SupportedCommands SimpleHttpServer::StringToCommand(const QString &s)
 {
     SupportedCommands command = comDefault;
 
@@ -133,6 +123,7 @@ SupportedCommands SimpleHttpServer::StringToCommand(QString s)
     return command;
 }
 
+// handle* methods is for sending server responses
 void SimpleHttpServer::handleRoot(QTcpSocket *pSocket)
 {
     QTextStream os(pSocket);
@@ -143,8 +134,6 @@ void SimpleHttpServer::handleRoot(QTcpSocket *pSocket)
     os << StringResources::processesList << " ";
     os << StringResources::listDir << " ";
     os << StringResources::dateString;
-
-    pSocket->close();
 }
 
 void SimpleHttpServer::handleNotFound(QTcpSocket *pSocket)
@@ -154,16 +143,22 @@ void SimpleHttpServer::handleNotFound(QTcpSocket *pSocket)
 
     os << StringResources::code404;
     os << StringResources::notFoundString;
+}
 
-    pSocket->close();
+void SimpleHttpServer::handleServerFailure(QTcpSocket *pSocket)
+{
+    QTextStream os(pSocket);
+    os.setAutoDetectUnicode(true);
 
+    os << StringResources::code500;
+    os << StringResources::internErrorString;
 }
 
 void SimpleHttpServer::handleProcessesList(QTcpSocket *pSocket)
 {
 
     ProcessStarter dateProcess(this);
-    dateProcess.execute("cmd.exe /C tasklist");
+    dateProcess.execute(StringResources::getProcessesListCommand());
 
     QStringList out = dateProcess.getProcessOuput();
 
@@ -176,30 +171,20 @@ void SimpleHttpServer::handleProcessesList(QTcpSocket *pSocket)
 
         for (QString &t : out)
         {
-            qDebug() << t;
-            os << t ;
-            os << "<br>";
+            os << t << StringResources::htmlNewLine;
         }
-
-        pSocket->close();
+    }    
+    else //something is wrong with process, sending 500
+    {
+        handleServerFailure(pSocket);
     }
-
-    //TODO: if no -> throw 500
 
 }
 
 void SimpleHttpServer::handleListDir(QTcpSocket *pSocket)
-{
-    //QTextStream os(pSocket);
-    //os.setAutoDetectUnicode(true);
-
-    //os << StringResources::code200;
-    //os << "This is list dir";
-
-    //pSocket->close();
-
+{   
     ProcessStarter dateProcess(this);
-    dateProcess.execute("cmd.exe /C dir");
+    dateProcess.execute(StringResources::getListDirCommand());
 
     QStringList out = dateProcess.getProcessOuput();
 
@@ -212,25 +197,19 @@ void SimpleHttpServer::handleListDir(QTcpSocket *pSocket)
 
         for (QString &t : out)
         {
-            qDebug() << t;
-            os << t ;
-            os << "<br>";
+            os << t << StringResources::htmlNewLine;
         }
-
-        pSocket->close();
+    }
+    else //something is wrong with process, sending 500
+    {
+        handleServerFailure(pSocket);
     }
 }
 
 void SimpleHttpServer::handleDate(QTcpSocket *pSocket)
-{
-    /*QTextStream os(pSocket);
-    os.setAutoDetectUnicode(true);
-
-    os << StringResources::code200;
-    os << "This is date"; */;
-
+{    
     ProcessStarter dateProcess(this);
-    dateProcess.execute("cmd.exe /C date /T");
+    dateProcess.execute(StringResources::getDateCommand());
 
     QStringList out = dateProcess.getProcessOuput();
 
@@ -240,13 +219,17 @@ void SimpleHttpServer::handleDate(QTcpSocket *pSocket)
         os.setAutoDetectUnicode(true);
 
         os << StringResources::code200;
-        os << out[0]; //TODO: loop
 
-        pSocket->close();
+        for (QString &t : out)
+        {
+            os << t << StringResources::htmlNewLine;
+        }
+
     }
-
-    //TODO: if no -> throw 500
-
-
+    else //something is wrong with process, sending 500
+    {
+        handleServerFailure(pSocket);
+    }
 }
+
 

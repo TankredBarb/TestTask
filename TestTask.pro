@@ -1,5 +1,3 @@
-QT -= gui
-
 QT += network
 
 CONFIG += c++11 console
@@ -13,6 +11,7 @@ SOURCES += \
         main.cpp \
         processstarter.cpp \
         servercore.cpp \
+        simpleapp.cpp \
         stringresources.cpp
 
 # Default rules for deployment.
@@ -23,4 +22,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     processstarter.h \
     servercore.h \
+    simpleapp.h \
     stringresources.h

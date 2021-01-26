@@ -10,17 +10,15 @@ class ProcessStarter : public QObject
 {
     Q_OBJECT
 
-
 public:
-    ProcessStarter(QObject * parent = 0);
+    ProcessStarter(QObject * parent = nullptr);
 
-    void execute (QString command);
+    void execute (const QString& command);
 
     QStringList getProcessOuput () const {return mOutput;}
 
 private:
     QProcess mProcess;
-    QString mProcessOutput;
     QStringList mOutput;
 
 private slots:

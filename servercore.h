@@ -14,9 +14,9 @@ class SimpleHttpServer : public QTcpServer
 {
      Q_OBJECT
  public:
-     SimpleHttpServer(quint16 port, QObject* par = 0);
+     SimpleHttpServer(quint16 port, QObject* par = nullptr);
 
-     void startListenPort();
+     bool startListenPort();
      void stopListenPort();     
 
      void incomingConnection(qintptr socketId);
@@ -36,7 +36,8 @@ private slots:
 
      SupportedCommands mCurrentCommand;
 
-     SupportedCommands StringToCommand(QString s);
+     // method to parse string data into the current command
+     SupportedCommands StringToCommand(const QString& s);
 
      // helper methods for sending http responses
      void handleRoot(QTcpSocket * pSocket);
@@ -48,6 +49,8 @@ private slots:
      void handleListDir(QTcpSocket * pSocket);
 
      void handleDate(QTcpSocket * pSocket);
+
+     void handleServerFailure(QTcpSocket * pSocket);
  };
 
 

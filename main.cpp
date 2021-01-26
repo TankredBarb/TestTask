@@ -1,14 +1,19 @@
-#include <QCoreApplication>
+#include "simpleapp.h"
 #include "servercore.h"
 #include "processstarter.h"
 
+
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    SimpleHttpServerApplication app(argc, argv);
 
-    SimpleHttpServer server(8080);
-    server.startListenPort();
+    if (!app.startServer())
+    {
+        qDebug() << "Unable to listen port. Terminating";
+        return -1;
+    }
 
+    qDebug() << "Started server. Enter 'q' to quit";
+    return app.exec();
 
-    return a.exec();
 }
