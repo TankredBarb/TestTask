@@ -24,7 +24,6 @@ private:
 private slots:
 
     void onReadyReadStdOut();
-
 };
 
 #endif // PROCESSSTARTER_H

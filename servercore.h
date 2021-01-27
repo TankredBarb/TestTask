@@ -19,15 +19,14 @@ class SimpleHttpServer : public QTcpServer
      bool startListenPort();
      void stopListenPort();     
 
+     // Handle a new client connection.
      void incomingConnection(qintptr socketId);
-
 
 private slots:
      void readFromClientSocket();
      void dropClientSocket();
 
- private:
-     bool disabled;
+private:
 
      quint16 mPort;
 
@@ -41,18 +40,12 @@ private slots:
 
      // helper methods for sending http responses
      void handleRoot(QTcpSocket * pSocket);
-
      void handleNotFound(QTcpSocket * pSocket);
-
      void handleProcessesList(QTcpSocket * pSocket);
-
      void handleListDir(QTcpSocket * pSocket);
-
      void handleDate(QTcpSocket * pSocket);
-
      void handleServerFailure(QTcpSocket * pSocket);
  };
-
 
 
 #endif // SERVERCORE_H

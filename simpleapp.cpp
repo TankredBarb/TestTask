@@ -35,7 +35,7 @@ StdinListener::StdinListener()
 
 void StdinListener::onFinishedGetLine(const QString &strNewLine)
 {
-    emit this->newLine(strNewLine);
+    emit newLine(strNewLine);
 }
 
 StdinListener::~StdinListener()
@@ -45,10 +45,10 @@ StdinListener::~StdinListener()
 }
 
 
-SimpleHttpServerApplication::SimpleHttpServerApplication(int argc, char **argv):
+SimpleHttpServerApplication::SimpleHttpServerApplication(quint16 port,int argc, char **argv):
     QCoreApplication(argc, argv)
 {
-    mServer = new SimpleHttpServer(8080, this);
+    mServer = new SimpleHttpServer(port, this);
     this->connect(this, SIGNAL(aboutToQuit()), this, SLOT(onAboutToQuit()));
     this->connect(&mStdinListener, SIGNAL(newLine(const QString &)), this, SLOT(onStdinNewLine(const QString &)));
 }
@@ -65,7 +65,7 @@ void SimpleHttpServerApplication::onAboutToQuit()
 }
 
 void SimpleHttpServerApplication::onStdinNewLine(const QString &newLine)
-{
+{    
     if (newLine.compare("q", Qt::CaseInsensitive) == 0)
     {
         this->quit();

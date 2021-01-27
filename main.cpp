@@ -1,11 +1,9 @@
 #include "simpleapp.h"
 #include "servercore.h"
-#include "processstarter.h"
-
 
 int main(int argc, char *argv[])
 {
-    SimpleHttpServerApplication app(argc, argv);
+    SimpleHttpServerApplication app(8081,argc,argv);
 
     if (!app.startServer())
     {
@@ -13,7 +11,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    qDebug() << "Started server. Enter 'q' to quit";
+    qDebug() << "Started server at port 8081. Enter 'q' to quit";
     return app.exec();
-
 }

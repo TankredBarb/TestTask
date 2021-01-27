@@ -53,7 +53,7 @@ class SimpleHttpServerApplication : public QCoreApplication
 {
     Q_OBJECT
 public:
-    SimpleHttpServerApplication(int argc, char **argv);
+    SimpleHttpServerApplication(quint16 port,int argc, char **argv);
 
     bool startServer();
 
@@ -63,7 +63,6 @@ private slots:
 
 private:
     SimpleHttpServer * mServer;
-
     StdinListener mStdinListener;
 };
 
