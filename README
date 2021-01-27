@@ -1,0 +1,15 @@
+This is a very simple Qt based HTTP server. It accepts connection on port 8081 and executes commands.
+
+Available commands:
+
+-/ - returns default html page with a commands list
+-/ProcList - returns a list of running processes
+-/ListDir - returns a list of files in working directory
+-/Date - returns the current date
+
+To test the server use the following url in your browser:
+http://<your-ip>:8081/ - (http://192.168.0.105:8081/ - for example). 
+You can also try this url with utilities like a curl
+
+Server will return 404 Not Found for all non-supported commands.
+Only HTTP GET method is supported. 
