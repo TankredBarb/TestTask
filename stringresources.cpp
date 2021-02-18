@@ -33,7 +33,8 @@ QString StringResources::getProcessesListCommand()
 
 #ifdef Q_OS_WIN
     cmd = "cmd.exe /C tasklist";
-#elif Q_OS_LINUX
+#endif
+#ifdef Q_OS_LINUX
     cmd = "ps ax";
 #endif
     return cmd;
@@ -45,7 +46,8 @@ QString StringResources::getListDirCommand()
 
 #ifdef Q_OS_WIN
     cmd = "cmd.exe /C dir";
-#elif Q_OS_LINUX
+#endif
+#ifdef Q_OS_LINUX
     cmd = "ls -la";
 #endif
     return cmd;
@@ -57,7 +59,8 @@ QString StringResources::getDateCommand()
 
 #ifdef Q_OS_WIN
     cmd = "cmd.exe /C date /T";
-#elif Q_OS_LINUX
+#endif
+#ifdef Q_OS_LINUX
     cmd = "date";
 #endif
     return cmd;
